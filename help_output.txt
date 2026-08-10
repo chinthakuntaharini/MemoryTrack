@@ -1,0 +1,30 @@
+2026-08-08 14:45:03,504 - root - WARNING - ByteTrack not available, will use simple tracking fallback
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1786180504.247807   39156 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1786180511.523748   39156 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-08 14:45:24,068 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-08-08 14:45:24,068 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2026-08-08 14:45:24,072 - faiss.loader - INFO - Loading faiss.
+2026-08-08 14:45:24,115 - faiss.loader - INFO - Successfully loaded faiss.
+usage: main.py [-h]
+               (--video VIDEO | --webcam WEBCAM | --batch BATCH [BATCH ...])
+               [--output OUTPUT] [--output-dir OUTPUT_DIR] [--no-display]
+               [--config CONFIG] [--log-level {DEBUG,INFO,WARNING,ERROR}]
+
+MemoryTrack - Adaptive Memory-Based Missing Person Tracking System
+
+options:
+  -h, --help            show this help message and exit
+  --video VIDEO         Path to video file
+  --webcam WEBCAM       Webcam device index
+  --batch BATCH [BATCH ...]
+                        List of video file paths for batch processing
+  --output OUTPUT       Path to save output video
+  --output-dir OUTPUT_DIR
+                        Directory to save batch output videos
+  --no-display          Disable display during processing
+  --config CONFIG       Path to configuration file
+  --log-level {DEBUG,INFO,WARNING,ERROR}
+                        Logging level

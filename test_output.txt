@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.1, pytest-9.1.1, pluggy-1.6.0
+rootdir: c:\Memory based missing person tracking
+configfile: pytest.ini
+plugins: anyio-4.12.1, cov-7.1.0
+collected 36 items
+
+tests\test_memory.py ...................                                 [ 52%]
+tests\test_matching.py .................                                 [100%]
+
+============================= 36 passed in 23.28s =============================

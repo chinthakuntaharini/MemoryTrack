@@ -1,0 +1,98 @@
+# MemoryTrack Configuration File
+
+# Detection settings
+detection:
+  model_path: "yolo11n.pt"
+  confidence_threshold: 0.5
+  nms_threshold: 0.45
+  device: "cuda"  # or "cpu"
+  batch_size: 8
+
+# Tracking settings
+tracking:
+  max_age: 30
+  min_hits: 3
+  iou_threshold: 0.3
+  track_buffer: 30
+
+# Feature extraction
+feature_extraction:
+  reid:
+    model_name: "osnet_x0_25"
+    weights_path: "weights/osnet_x0_25_market1501.pth"
+    embedding_dim: 512
+    device: "cuda"
+  
+  pose:
+    model_complexity: 1  # 0, 1, or 2
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+    num_keypoints: 33
+  
+  color:
+    hist_bins: 16
+    regions: ["upper_body", "lower_body"]
+    hsv_channels: [0, 1, 2]  # H, S, V channels
+  
+  accessories:
+    model_path: "yolo11n.pt"
+    confidence_threshold: 0.4
+    classes: ["backpack", "handbag", "suitcase", "umbrella", "cap", "bottle"]
+  
+  motion:
+    history_length: 10
+    velocity_smoothing: 0.3
+
+# Memory bank
+memory_bank:
+  embedding_dim: 720
+  decay_rate: 0.0001  # Per second
+  max_snapshots_per_person: 10
+  update_threshold: 0.8
+  index_type: "IndexFlatIP"
+  normalize: true
+
+# Feature fusion weights
+fusion_weights:
+  reid: 0.4
+  pose: 0.2
+  color: 0.15
+  accessory: 0.15
+  motion: 0.1
+
+# Dashboard
+dashboard:
+  refresh_interval: 100  # ms
+  max_display_cameras: 4
+  show_confidence_threshold: 0.6
+  sidebar_width: 300
+
+# Database
+database:
+  type: "sqlite"
+  path: "database/memorytrack.db"
+  # For PostgreSQL (uncomment to use):
+  # host: "localhost"
+  # port: 5432
+  # name: "memorytrack"
+  # user: "postgres"
+  # password: "password"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "logs/memorytrack.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Video processing
+video:
+  frame_skip: 0  # Process every Nth frame (0 = all frames)
+  resize_width: 1280  # Resize frames for processing (0 = original)
+  resize_height: 720
+  buffer_size: 10
+
+# Performance
+performance:
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2

@@ -1,0 +1,15 @@
+Starting import test...
+WARNING:root:ByteTrack not available, will use simple tracking fallback
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1786179986.661953   36972 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1786179993.168943   36972 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Core imports OK
+Memory bank add_profile OK
+Profiles: 1
+AccessoryExtractor OK, vector_dim: 32
+OcclusionDetector OK
+ExplanationGenerator OK
+Search results: 1
+Match person_id: 1
+ALL IMPORTS AND BASIC FUNCTIONS WORK

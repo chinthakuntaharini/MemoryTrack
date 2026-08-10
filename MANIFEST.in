@@ -1,0 +1,54 @@
+# MemoryTrack package manifest
+
+# Include configuration files
+include config/*.yaml
+include database/schema.sql
+
+# Include documentation
+include README.md
+include LICENSE
+include SETUP.md
+include DEPLOYMENT_SUMMARY.md
+include TODO.md
+
+# Include requirements
+include requirements.txt
+
+# Include Docker files
+include Dockerfile
+include docker-compose.yml
+include .dockerignore
+
+# Include test configuration
+include pytest.ini
+
+# Include steering files
+recursive-include .kiro *.md
+
+# Exclude compiled Python files
+global-exclude __pycache__
+global-exclude *.py[co]
+
+# Exclude development files
+exclude .gitignore
+exclude *.log
+exclude test_output.txt
+exclude verify_output.txt
+exclude help_output.txt
+
+# Exclude test outputs and cached files
+recursive-exclude tests __pycache__
+recursive-exclude core __pycache__
+recursive-exclude utils __pycache__
+recursive-exclude dashboard __pycache__
+
+# Exclude database files (structure included via schema.sql)
+exclude database/*.db
+exclude database/*.db-*
+
+# Exclude logs
+exclude logs/*.log
+
+# Exclude model weights (downloaded at runtime)
+exclude weights/*.pth
+exclude weights/*.pt

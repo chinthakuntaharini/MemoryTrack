@@ -1,0 +1,46 @@
+# Core Dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Detection & Tracking
+ultralytics>=8.0.0
+# bytetrack>=1.0.0  # Optional - falls back to simple tracking
+
+# Feature Extraction
+# torchreid>=0.2.5  # Optional - falls back to ResNet
+mediapipe>=0.10.0
+# mmpose>=1.0.0     # Optional - MediaPipe is primary
+# mmdet>=3.0.0      # Optional - not required
+# mmcv>=2.0.0       # Optional - not required
+
+# Vector Storage
+faiss-cpu>=1.7.0
+
+# Dashboard
+streamlit>=1.28.0
+plotly>=5.17.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# Utilities
+pyyaml>=6.0
+tqdm>=4.66.0
+pillow>=10.0.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Optional: GPU Support (uncomment if using CUDA)
+# faiss-gpu>=1.7.0
+
+# Optional: Enhanced Components (uncomment to enable)
+# bytetrack>=1.0.0          # Enhanced tracking
+# torchreid>=0.2.5          # Specialized ReID models
+# mmpose>=1.0.0             # Alternative pose estimation
+# mmdet>=3.0.0 mmcv>=2.0.0  # MMPose dependencies

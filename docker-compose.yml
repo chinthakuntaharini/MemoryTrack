@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  memorytrack:
+    build: .
+    container_name: memorytrack-app
+    ports:
+      - "8501:8501"  # Streamlit dashboard
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+      - ./weights:/app/weights
+      - ./videos:/app/videos  # Mount video directory
+    environment:
+      - PYTHONPATH=/app
+      - STREAMLIT_SERVER_HEADLESS=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8501/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # PostgreSQL database (optional - for production)
+  postgres:
+    image: postgres:15
+    container_name: memorytrack-db
+    environment:
+      POSTGRES_DB: memorytrack
+      POSTGRES_USER: memorytrack
+      POSTGRES_PASSWORD: memorytrack_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    profiles:
+      - production  # Only start with --profile production
+
+  # Redis for caching (optional - for production)
+  redis:
+    image: redis:7-alpine
+    container_name: memorytrack-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # NVIDIA GPU support (uncomment for GPU acceleration)
+  # memorytrack-gpu:
+  #   build: .
+  #   container_name: memorytrack-gpu
+  #   runtime: nvidia
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #   ports:
+  #     - "8502:8501"
+  #   volumes:
+  #     - ./database:/app/database
+  #     - ./logs:/app/logs
+  #     - ./weights:/app/weights
+  #     - ./videos:/app/videos
+  #   profiles:
+  #     - gpu
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: memorytrack-network
