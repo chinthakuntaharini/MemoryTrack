@@ -247,7 +247,7 @@ This project builds upon excellent open-source libraries:
 ## Contact
 
 For questions and support:
-- Email: your.email@example.com
+- Email: harini.chinthakunta@gmail.com
 - Issues: GitHub Issues
 
 ## Roadmap
