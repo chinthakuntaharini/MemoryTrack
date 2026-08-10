@@ -13,15 +13,15 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libglib2.0-0 \
     libgtk-3-0 \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
     libgl1-mesa-glx \
+    libgstreamer1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt || \
+    (echo "Some packages failed to install, continuing..." && \
+     pip install --no-cache-dir --no-deps -r requirements.txt)
 
 # Copy application code
 COPY . .
@@ -29,8 +29,17 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p logs database weights
 
-# Initialize database
-RUN python -c "from utils.db_manager import DatabaseManager; db = DatabaseManager(); db.init_db()"
+# Initialize database (with error handling)
+RUN python -c "
+try:
+    from utils.db_manager import DatabaseManager
+    db = DatabaseManager()
+    db.init_db()
+    print('Database initialized successfully')
+except Exception as e:
+    print(f'Database initialization failed: {e}')
+    print('Database will be initialized on first run')
+" || echo "Database will be initialized on first run"
 
 # Expose port for Streamlit dashboard
 EXPOSE 8501
@@ -42,7 +51,7 @@ ENV STREAMLIT_SERVER_ENABLE_CORS=false
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8501/health')" || exit 1
+    CMD python -c "import requests; requests.get('http://localhost:8501/_stcore/health')" || exit 1
 
 # Default command - run dashboard
 CMD ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0"]

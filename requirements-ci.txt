@@ -1,0 +1,30 @@
+# Lightweight CI requirements - excludes heavy ML packages for faster CI builds
+
+# Core utilities (lightweight versions)
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+
+# Dashboard
+streamlit>=1.28.0
+plotly>=5.17.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# Utilities
+pyyaml>=6.0
+tqdm>=4.66.0
+pillow>=10.0.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Development
+flake8>=6.0.0
+
+# Note: Heavy packages (torch, torchvision, ultralytics, mediapipe, faiss) 
+# are excluded from CI to speed up builds and avoid memory issues.
+# These are mocked in tests when needed.
