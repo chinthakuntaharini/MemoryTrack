@@ -205,7 +205,7 @@ def process_video_display(video_path: str):
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
             # Display frame
-            video_placeholder.image(frame_rgb, channels="RGB", use_column_width=True)
+            video_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
             
             frame_count += 1
             progress_bar.progress(frame_count / min(100, total_frames))
@@ -251,7 +251,7 @@ def process_webcam_display():
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
             # Display
-            video_placeholder.image(frame_rgb, channels="RGB", use_column_width=True)
+            video_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -284,7 +284,7 @@ def render_missing_person_search():
             )
             
             if uploaded_image:
-                st.image(uploaded_image, caption="Query Image", use_column_width=True)
+                st.image(uploaded_image, caption="Query Image", use_container_width=True)
                 
                 if st.button("Search"):
                     st.info("Searching memory bank...")

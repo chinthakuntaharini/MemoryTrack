@@ -14,14 +14,14 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 def demo_configuration():
     """Demonstrate configuration loading."""
-    print("🔧 Configuration Loading Demo")
+    print("Configuration Loading Demo")
     print("-" * 40)
     
     try:
         from utils.config_loader import ConfigLoader
         
         config = ConfigLoader()
-        print("✅ Configuration loaded successfully")
+        print("Configuration loaded successfully")
         
         # Show some config values
         det_config = config.get_detection_config()
@@ -237,7 +237,7 @@ def demo_dashboard_info():
 
 def main():
     """Run the complete demo."""
-    print("🎯 MemoryTrack System Demo")
+    print("MemoryTrack System Demo")
     print("=" * 50)
     print("This demo showcases the core functionality of MemoryTrack")
     print("without requiring heavy ML dependencies.\n")
