@@ -203,7 +203,7 @@ class MemoryTrackApp(QMainWindow):
         main_layout = QVBoxLayout(central_widget)
 
         # Header Title
-        title_label = QLabel("🧠 MemoryTrack System")
+        title_label = QLabel("MemoryTrack System")
         title_label.setFont(QFont("Segoe UI", 20, QFont.Weight.Bold))
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_label.setStyleSheet("color: #89b4fa; margin: 6px;")
@@ -216,22 +216,22 @@ class MemoryTrackApp(QMainWindow):
         # Tab 1: Live Video Feed
         self.tab_live = QWidget()
         self._setup_live_tab()
-        self.tabs.addTab(self.tab_live, "🎥 Live Tracking")
+        self.tabs.addTab(self.tab_live, "Live Tracking")
 
         # Tab 2: Memory Bank & Person Profiles
         self.tab_memory = QWidget()
         self._setup_memory_tab()
-        self.tabs.addTab(self.tab_memory, "🧠 Memory Bank & Profiles")
+        self.tabs.addTab(self.tab_memory, "Memory Bank & Profiles")
 
         # Tab 3: Missing Person Search
         self.tab_search = QWidget()
         self._setup_search_tab()
-        self.tabs.addTab(self.tab_search, "🔍 Missing Person Search")
+        self.tabs.addTab(self.tab_search, "Missing Person Search")
 
         # Tab 4: System Logs & Database
         self.tab_logs = QWidget()
         self._setup_logs_tab()
-        self.tabs.addTab(self.tab_logs, "📊 Database & Activity Logs")
+        self.tabs.addTab(self.tab_logs, "Database & Activity Logs")
 
         # Status Bar
         self.status_bar = QStatusBar()
@@ -251,13 +251,13 @@ class MemoryTrackApp(QMainWindow):
 
         # Controls Area
         controls_layout = QHBoxLayout()
-        self.btn_load_video = QPushButton("📹 Load Video File")
+        self.btn_load_video = QPushButton("Load Video File")
         self.btn_load_video.clicked.connect(self.load_video)
         
-        self.btn_start_webcam = QPushButton("📸 Start Webcam")
+        self.btn_start_webcam = QPushButton("Start Webcam")
         self.btn_start_webcam.clicked.connect(self.start_webcam)
         
-        self.btn_stop = QPushButton("🛑 Stop Processing")
+        self.btn_stop = QPushButton("Stop Processing")
         self.btn_stop.clicked.connect(self.stop_processing)
         self.btn_stop.setEnabled(False)
 
@@ -271,10 +271,10 @@ class MemoryTrackApp(QMainWindow):
 
         # Action bar
         action_layout = QHBoxLayout()
-        self.btn_refresh_memory = QPushButton("🔄 Refresh Memory Bank")
+        self.btn_refresh_memory = QPushButton("Refresh Memory Bank")
         self.btn_refresh_memory.clicked.connect(self.refresh_memory_table)
 
-        self.btn_clear_memory = QPushButton("🗑️ Clear Database")
+        self.btn_clear_memory = QPushButton("Clear Database")
         self.btn_clear_memory.setStyleSheet("background-color: #f38ba8; color: #11111b; font-weight: bold;")
         self.btn_clear_memory.clicked.connect(self.clear_all_memory)
         
@@ -290,8 +290,8 @@ class MemoryTrackApp(QMainWindow):
         self.profiles_table = QTableWidget()
         self.profiles_table.setColumnCount(10)
         self.profiles_table.setHorizontalHeaderLabels([
-            "ID", "Name", "Status", "👕 Upper Clothes", "👖 Lower Clothes",
-            "🎒 Accessories", "🏃 Posture", "📸 Snapshots", "📹 Camera", "🕒 Timestamp"
+            "ID", "Name", "Status", "Upper Clothes", "Lower Clothes",
+            "Accessories", "Posture", "Snapshots", "Camera", "Timestamp"
         ])
         self.profiles_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.profiles_table.horizontalHeader().setStretchLastSection(True)
@@ -301,14 +301,14 @@ class MemoryTrackApp(QMainWindow):
     def _setup_search_tab(self):
         layout = QVBoxLayout(self.tab_search)
 
-        group_box = QGroupBox("🔍 Forensic Search & Person Inspection")
+        group_box = QGroupBox("Forensic Search & Person Inspection")
         form_layout = QHBoxLayout(group_box)
 
         self.input_search_id = QSpinBox()
         self.input_search_id.setRange(1, 99999)
         self.input_search_id.setValue(1)
         
-        self.btn_execute_search = QPushButton("🔍 Search Person ID")
+        self.btn_execute_search = QPushButton("Search Person ID")
         self.btn_execute_search.clicked.connect(self.execute_search)
 
         form_layout.addWidget(QLabel("Target Person ID:"))
@@ -327,7 +327,7 @@ class MemoryTrackApp(QMainWindow):
         layout = QVBoxLayout(self.tab_logs)
         
         action_layout = QHBoxLayout()
-        self.btn_refresh_logs = QPushButton("🔄 Refresh Logs")
+        self.btn_refresh_logs = QPushButton("Refresh Logs")
         self.btn_refresh_logs.clicked.connect(self.refresh_logs)
         action_layout.addWidget(self.btn_refresh_logs)
         action_layout.addStretch()
@@ -438,26 +438,26 @@ class MemoryTrackApp(QMainWindow):
 
         person = self.db.get_person(target_id)
         if not person:
-            self.search_results_text.setText(f"❌ Person ID {target_id} not found in database.\n\nTip: Start video playback or webcam to detect and store person profiles.")
+            self.search_results_text.setText(f"Person ID {target_id} not found in database.\n\nTip: Start video playback or webcam to detect and store person profiles.")
             return
 
         snapshots = self.db.get_person_snapshots(target_id)
         report = []
         report.append("=" * 65)
-        report.append(f"🔍 FORENSIC INVESTIGATION PROFILE - PERSON ID: #{target_id}")
+        report.append(f"FORENSIC INVESTIGATION PROFILE - PERSON ID: #{target_id}")
         report.append("=" * 65)
-        report.append(f"  • Name / Label:          {person.get('name', 'Unknown')}")
-        report.append(f"  • Current Status:        {person.get('status', 'ACTIVE').upper()}")
-        report.append(f"  • Upper Clothing:        {person.get('upper_color', 'Unknown')}")
-        report.append(f"  • Lower Clothing:        {person.get('lower_color', 'Unknown')}")
-        report.append(f"  • Carried Items:         {person.get('accessories', 'None')}")
-        report.append(f"  • Body Posture / Gait:   {person.get('posture', 'Standing')}")
-        report.append(f"  • Last Seen Camera:      {person.get('last_seen_camera', 'N/A')}")
-        report.append(f"  • Last Seen Timestamp:   {person.get('last_seen_time', 'N/A')}")
-        report.append(f"  • Total Snapshots:       {len(snapshots)}")
-        report.append(f"  • Investigation Notes:   {person.get('notes', 'N/A')}")
+        report.append(f"  * Name / Label:          {person.get('name', 'Unknown')}")
+        report.append(f"  * Current Status:        {person.get('status', 'ACTIVE').upper()}")
+        report.append(f"  * Upper Clothing:        {person.get('upper_color', 'Unknown')}")
+        report.append(f"  * Lower Clothing:        {person.get('lower_color', 'Unknown')}")
+        report.append(f"  * Carried Items:         {person.get('accessories', 'None')}")
+        report.append(f"  * Body Posture / Gait:   {person.get('posture', 'Standing')}")
+        report.append(f"  * Last Seen Camera:      {person.get('last_seen_camera', 'N/A')}")
+        report.append(f"  * Last Seen Timestamp:   {person.get('last_seen_time', 'N/A')}")
+        report.append(f"  * Total Snapshots:       {len(snapshots)}")
+        report.append(f"  * Investigation Notes:   {person.get('notes', 'N/A')}")
         report.append("-" * 65)
-        report.append("📸 TEMPORAL SNAPSHOT HISTORY (Multi-Modal Vectors):")
+        report.append("TEMPORAL SNAPSHOT HISTORY (Multi-Modal Vectors):")
         
         for idx, s in enumerate(snapshots[:8]):
             report.append(f"  [Snapshot #{idx+1}] Cam: {s.get('camera_id')} | Conf: {s.get('confidence', 1.0)*100:.1f}% | Frame: {s.get('frame_number', 'N/A')} | Time: {s.get('timestamp')}")

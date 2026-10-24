@@ -421,8 +421,8 @@ class MemoryTrackPipeline:
                     # Draw Accessory and Posture badge
                     badge_items = []
                     if consensus_accessories_str != "None":
-                        badge_items.append(f"🎒 {consensus_accessories_str}")
-                    badge_items.append(f"🏃 {consensus_posture}")
+                        badge_items.append(f"Acc: {consensus_accessories_str}")
+                    badge_items.append(f"Posture: {consensus_posture}")
                     
                     cv2.putText(
                         frame,

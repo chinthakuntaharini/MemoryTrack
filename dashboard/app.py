@@ -16,7 +16,7 @@ import time
 # Page configuration
 st.set_page_config(
     page_title="MemoryTrack Dashboard",
-    page_icon="🔍",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -55,7 +55,7 @@ else:
 
 def main():
     """Main dashboard application."""
-    st.title("🔍 MemoryTrack - Missing Person Tracking System")
+    st.title("MemoryTrack - Missing Person Tracking System")
     
     if not UTILS_AVAILABLE:
         st.error("Dashboard cannot function without core components. Please check the installation.")
@@ -97,7 +97,7 @@ def main():
 
 def render_live_monitoring():
     """Render live monitoring page."""
-    st.header("📹 Live Monitoring")
+    st.header("Live Monitoring")
     
     col1, col2 = st.columns([2, 1])
     
@@ -267,7 +267,7 @@ def process_webcam_display():
 
 def render_missing_person_search():
     """Render missing person search page."""
-    st.header("🔎 Missing Person Search")
+    st.header("Missing Person Search")
     
     col1, col2 = st.columns([1, 1])
     
@@ -330,7 +330,7 @@ def render_missing_person_search():
 
 def render_memory_bank():
     """Render memory bank management page."""
-    st.header("💾 Memory Bank Management")
+    st.header("Memory Bank Management")
     
     col1, col2 = st.columns([2, 1])
     
@@ -410,7 +410,7 @@ def render_memory_bank():
 
 def render_analytics():
     """Render analytics page."""
-    st.header("📊 System Analytics")
+    st.header("System Analytics")
     
     # Memory bank statistics
     stats = st.session_state.memory_bank.get_statistics()
