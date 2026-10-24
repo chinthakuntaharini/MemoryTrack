@@ -145,10 +145,10 @@ class AccessoryExtractor:
                         class_id=getattr(bbox, 'class_id', -1)
                     ))
 
-        # Filter detections that overlap with the person bbox
+        # Filter detections that overlap with or are contained in the person bbox (IoA >= 0.25)
         matched = [
             d for d in all_accessory_detections
-            if self._compute_iou(person_bbox, d.bbox) >= self.iou_threshold
+            if self._compute_overlap(person_bbox, d.bbox) >= 0.25
         ]
 
         # Build one-hot style vector
@@ -212,29 +212,27 @@ class AccessoryExtractor:
             vec = vec[:self.vector_dim]
         return vec
 
-    def _compute_iou(self, bbox1: Tuple[float, float, float, float],
-                     bbox2: Tuple[float, float, float, float]) -> float:
+    def _compute_overlap(self, person_bbox: Tuple[float, float, float, float],
+                         acc_bbox: Tuple[float, float, float, float]) -> float:
         """
-        Compute Intersection over Union between two bounding boxes.
-
-        Args:
-            bbox1: First bbox (x1, y1, x2, y2)
-            bbox2: Second bbox (x1, y1, x2, y2)
-
-        Returns:
-            IoU score
+        Compute Intersection over Accessory Area (IoA).
+        Checks how much of the accessory is contained within the person's bounding box.
         """
-        x1 = max(bbox1[0], bbox2[0])
-        y1 = max(bbox1[1], bbox2[1])
-        x2 = min(bbox1[2], bbox2[2])
-        y2 = min(bbox1[3], bbox2[3])
+        x1 = max(person_bbox[0], acc_bbox[0])
+        y1 = max(person_bbox[1], acc_bbox[1])
+        x2 = min(person_bbox[2], acc_bbox[2])
+        y2 = min(person_bbox[3], acc_bbox[3])
 
         inter_area = max(0.0, x2 - x1) * max(0.0, y2 - y1)
-        area1 = (bbox1[2] - bbox1[0]) * (bbox1[3] - bbox1[1])
-        area2 = (bbox2[2] - bbox2[0]) * (bbox2[3] - bbox2[1])
-        union = area1 + area2 - inter_area
+        acc_area = (acc_bbox[2] - acc_bbox[0]) * (acc_bbox[3] - acc_bbox[1])
 
-        if union <= 0:
+        if acc_area <= 0:
             return 0.0
-        return inter_area / union
+        return float(inter_area / acc_area)
+
+    def _compute_iou(self, bbox1: Tuple[float, float, float, float],
+                     bbox2: Tuple[float, float, float, float]) -> float:
+        """Legacy helper for bounding box IoU."""
+        return self._compute_overlap(bbox1, bbox2)
+
 

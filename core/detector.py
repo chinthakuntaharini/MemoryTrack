@@ -33,8 +33,9 @@ class BoundingBox:
     x2: float
     y2: float
     confidence: float
-    class_id: int
-    class_name: str
+    class_id: int = 0
+    class_name: str = "person"
+
 
 
 @dataclass
@@ -172,7 +173,8 @@ class PersonDetector:
             Dictionary with 'persons' and 'accessories' keys
         """
         try:
-            results = self.model(frame, conf=self.confidence_threshold,
+            # Lower confidence for accessory detection to catch bags/caps reliably
+            results = self.model(frame, conf=0.25,
                                iou=self.nms_threshold, verbose=False)
             
             output = {
@@ -216,8 +218,8 @@ class PersonDetector:
 class MultiObjectTracker:
     """ByteTrack wrapper for multi-object tracking."""
     
-    def __init__(self, max_age: int = 30, min_hits: int = 3,
-                 iou_threshold: float = 0.3):
+    def __init__(self, max_age: int = 45, min_hits: int = 2,
+                 iou_threshold: float = 0.2):
         """
         Initialize multi-object tracker.
         
@@ -346,31 +348,47 @@ class MultiObjectTracker:
             return self._update_simple(detections)
     
     def _update_simple(self, detections: List[BoundingBox]) -> Dict[int, Track]:
-        """Simple tracking fallback using IOU matching."""
+        """Simple tracking fallback with spatial distance and IOU matching."""
         active_tracks = {}
+        assigned_track_ids = set()
         
-        # Simple IOU-based matching
         for det in detections:
             best_match_id = None
-            best_iou = 0.0
+            best_score = -1.0
+            
+            det_cx = (det.x1 + det.x2) / 2
+            det_cy = (det.y1 + det.y2) / 2
+            det_diag = np.sqrt((det.x2 - det.x1)**2 + (det.y2 - det.y1)**2) + 1e-6
             
             for track_id, track in self.tracks.items():
+                if track_id in assigned_track_ids:
+                    continue
+                
                 iou = self._calculate_iou(det, track.bbox)
-                if iou > best_iou and iou > self.iou_threshold:
-                    best_iou = iou
+                
+                # Center distance
+                trk_cx = (track.bbox.x1 + track.bbox.x2) / 2
+                trk_cy = (track.bbox.y1 + track.bbox.y2) / 2
+                dist = np.sqrt((det_cx - trk_cx)**2 + (det_cy - trk_cy)**2)
+                normalized_dist = dist / det_diag
+                
+                # Match score combines IOU and proximity (recency-weighted)
+                recency_penalty = min(track.time_since_update * 0.05, 0.5)
+                score = iou + max(0.0, 0.7 - normalized_dist) - recency_penalty
+                
+                if (iou > self.iou_threshold or normalized_dist < 0.45) and score > best_score and score > 0.3:
+                    best_score = score
                     best_match_id = track_id
             
             if best_match_id is not None:
                 # Update existing track
+                assigned_track_ids.add(best_match_id)
                 track = self.tracks[best_match_id]
                 track.bbox = det
                 track.time_since_update = 0
                 track.age += 1
                 
-                # Update history and velocity
-                center_x = (det.x1 + det.x2) / 2
-                center_y = (det.y1 + det.y2) / 2
-                track.history.append((center_x, center_y))
+                track.history.append((det_cx, det_cy))
                 if len(track.history) > 10:
                     track.history = track.history[-10:]
                 
@@ -384,18 +402,16 @@ class MultiObjectTracker:
                 active_tracks[best_match_id] = track
             else:
                 # Create new track
-                center_x = (det.x1 + det.x2) / 2
-                center_y = (det.y1 + det.y2) / 2
-                
                 active_tracks[self.next_track_id] = Track(
                     track_id=self.next_track_id,
                     bbox=det,
                     age=0,
                     time_since_update=0,
                     state='new',
-                    history=[(center_x, center_y)],
+                    history=[(det_cx, det_cy)],
                     velocity=(0, 0)
                 )
+                assigned_track_ids.add(self.next_track_id)
                 self.next_track_id += 1
         
         # Increment time_since_update for lost tracks

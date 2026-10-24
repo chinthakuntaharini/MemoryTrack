@@ -36,14 +36,83 @@ class DatabaseManager:
         self.connect()
     
     def connect(self) -> None:
-        """Establish database connection."""
+        """Establish database connection and ensure tables exist."""
         try:
-            self.connection = sqlite3.connect(str(self.db_path))
+            self.connection = sqlite3.connect(str(self.db_path), check_same_thread=False)
             self.connection.row_factory = sqlite3.Row  # Enable dict-like access
+            self._ensure_schema()
             logger.info(f"Connected to database: {self.db_path}")
         except sqlite3.Error as e:
             logger.error(f"Failed to connect to database: {e}")
             raise
+
+    def _ensure_schema(self) -> None:
+        """Ensure all required tables and investigative columns exist."""
+        if not self.connection:
+            return
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS persons (
+                    person_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    status TEXT DEFAULT 'active',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_seen_camera TEXT,
+                    last_seen_time TIMESTAMP,
+                    upper_color TEXT,
+                    lower_color TEXT,
+                    accessories TEXT,
+                    posture TEXT,
+                    notes TEXT
+                );
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS feature_snapshots (
+                    snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    person_id INTEGER NOT NULL,
+                    features BLOB,
+                    camera_id TEXT NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    confidence REAL NOT NULL,
+                    frame_number INTEGER,
+                    FOREIGN KEY (person_id) REFERENCES persons(person_id) ON DELETE CASCADE
+                );
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS system_events (
+                    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_type TEXT NOT NULL,
+                    event_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    camera_id TEXT,
+                    details TEXT,
+                    severity TEXT DEFAULT 'INFO'
+                );
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS matches (
+                    match_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    query_person_id INTEGER,
+                    matched_person_id INTEGER NOT NULL,
+                    confidence REAL NOT NULL,
+                    match_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    camera_id TEXT NOT NULL,
+                    explanation TEXT
+                );
+            """)
+            # Check for newly added columns if table already existed
+            cursor.execute("PRAGMA table_info(persons)")
+            cols = [row['name'] for row in cursor.fetchall()]
+            for col in ['upper_color', 'lower_color', 'accessories', 'posture']:
+                if col not in cols:
+                    try:
+                        cursor.execute(f"ALTER TABLE persons ADD COLUMN {col} TEXT")
+                    except Exception:
+                        pass
+            self.connection.commit()
+        except Exception as e:
+            logger.warning(f"Error ensuring schema: {e}")
     
     def close(self) -> None:
         """Close database connection."""
@@ -79,31 +148,88 @@ class DatabaseManager:
     
     # Person Profile Operations
     
-    def add_person(self, name: Optional[str] = None, status: str = "missing",
-                   notes: Optional[str] = None) -> int:
+    def add_person(self, name: Optional[str] = None, status: str = "active",
+                   notes: Optional[str] = None,
+                   upper_color: Optional[str] = None,
+                   lower_color: Optional[str] = None,
+                   accessories: Optional[str] = None,
+                   posture: Optional[str] = None) -> int:
         """
-        Add a new person profile.
-        
-        Args:
-            name: Person name (optional)
-            status: Person status ('missing', 'found', 'safe')
-            notes: Additional notes
-            
-        Returns:
-            person_id of the created profile
+        Add a new person profile with appearance attributes.
         """
         cursor = self.connection.cursor()
         cursor.execute(
             """
-            INSERT INTO persons (name, status, notes)
-            VALUES (?, ?, ?)
+            INSERT INTO persons (name, status, notes, upper_color, lower_color, accessories, posture)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (name, status, notes)
+            (name, status, notes, upper_color, lower_color, accessories, posture)
         )
         self.connection.commit()
         person_id = cursor.lastrowid
         logger.info(f"Added person profile: {person_id}")
         return person_id
+
+    def add_or_update_tracked_person(self, person_id: int,
+                                     name: Optional[str] = None,
+                                     status: str = "active",
+                                     last_seen_camera: str = "cam_0",
+                                     last_seen_time: Optional[str] = None,
+                                     upper_color: Optional[str] = None,
+                                     lower_color: Optional[str] = None,
+                                     accessories: Optional[str] = None,
+                                     posture: Optional[str] = None,
+                                     notes: Optional[str] = None) -> int:
+        """Insert or update a tracked person profile with forensic appearance attributes."""
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT person_id FROM persons WHERE person_id = ?", (person_id,))
+        existing = cursor.fetchone()
+        
+        now_str = last_seen_time or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if existing:
+            cursor.execute("""
+                UPDATE persons SET
+                    last_seen_camera = ?,
+                    last_seen_time = ?,
+                    upper_color = COALESCE(?, upper_color),
+                    lower_color = COALESCE(?, lower_color),
+                    accessories = COALESCE(?, accessories),
+                    posture = COALESCE(?, posture),
+                    notes = COALESCE(?, notes),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE person_id = ?
+            """, (last_seen_camera, now_str, upper_color, lower_color, accessories, posture, notes, person_id))
+        else:
+            cursor.execute("""
+                INSERT INTO persons (person_id, name, status, last_seen_camera, last_seen_time, upper_color, lower_color, accessories, posture, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (person_id, name or f"Person #{person_id}", status, last_seen_camera, now_str, upper_color, lower_color, accessories, posture, notes))
+
+        self.connection.commit()
+        return person_id
+
+    def create_person(self, person_data: Dict[str, Any]) -> int:
+        """Convenience method to create a person from a dictionary."""
+        return self.add_person(
+            name=person_data.get('name', 'Unknown'),
+            status=person_data.get('status', 'active'),
+            notes=person_data.get('notes'),
+            upper_color=person_data.get('upper_color'),
+            lower_color=person_data.get('lower_color'),
+            accessories=person_data.get('accessories'),
+            posture=person_data.get('posture')
+        )
+
+    def add_feature_snapshot(self, snapshot_data: Dict[str, Any]) -> int:
+        """Convenience method to add a snapshot from a dictionary."""
+        return self.add_snapshot(
+            person_id=snapshot_data['person_id'],
+            features=snapshot_data['features'],
+            camera_id=snapshot_data.get('camera_id', 'unknown'),
+            confidence=snapshot_data.get('confidence', 1.0),
+            frame_number=snapshot_data.get('frame_number')
+        )
     
     def get_person(self, person_id: int) -> Optional[Dict[str, Any]]:
         """
@@ -366,6 +492,24 @@ class DatabaseManager:
         )
         self.connection.commit()
         match_id = cursor.lastrowid
+        return match_id
+
+    def clear_database(self) -> None:
+        """Clear all records from database tables for a clean session."""
+        if not self.connection:
+            return
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM modality_features")
+        cursor.execute("DELETE FROM accessories")
+        cursor.execute("DELETE FROM feature_snapshots")
+        cursor.execute("DELETE FROM matches")
+        cursor.execute("DELETE FROM tracking_history")
+        cursor.execute("DELETE FROM persons")
+        cursor.execute("DELETE FROM system_events")
+        self.connection.commit()
+        logger.info("Cleared all database tables")
+
+        match_id = cursor.lastrowid
         logger.info(f"Added match {match_id}: person {matched_person_id} with {confidence:.2f} confidence")
         return match_id
     
@@ -455,6 +599,15 @@ class DatabaseManager:
         )
         self.connection.commit()
     
+    def close(self) -> None:
+        """Close database connection."""
+        if hasattr(self, 'connection') and self.connection:
+            try:
+                self.connection.close()
+                logger.info("Database connection closed")
+            except Exception as e:
+                logger.warning(f"Error closing database connection: {e}")
+
     def __enter__(self):
         """Context manager entry."""
         return self
@@ -462,3 +615,4 @@ class DatabaseManager:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         self.close()
+

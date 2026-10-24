@@ -177,6 +177,8 @@ class ConfigLoader:
         """Get memory bank configuration."""
         return self.config.get("memory_bank", {})
     
+    get_memory_bank = get_memory_bank_config
+    
     def get_fusion_weights(self) -> Dict[str, float]:
         """Get feature fusion weights."""
         return self.config.get("fusion_weights", {})

@@ -155,8 +155,8 @@ class FeatureFusion:
             
             # Adjust weight based on confidence
             confidence = confidences.get(modality, 1.0)
-            if confidence < 0.5:
-                # Low confidence: reduce weight
+            if confidence < 0.8:
+                # Lower confidence: reduce weight proportionally
                 adjusted_weights[modality] *= confidence
                 logger.debug(f"Reduced weight for low-confidence {modality}: {confidence}")
         

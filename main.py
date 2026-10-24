@@ -19,6 +19,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+from collections import Counter, defaultdict
+
 # Import MemoryTrack components
 from utils.config_loader import ConfigLoader
 from utils.db_manager import DatabaseManager
@@ -53,6 +55,16 @@ class MemoryTrackPipeline:
         # Initialize database
         db_config = self.config.get_database_config()
         self.db = DatabaseManager(db_config.get('path'))
+
+        # Temporal consensus and track re-association maps
+        self.person_temporal_history = defaultdict(lambda: {
+            'upper_colors': [],
+            'lower_colors': [],
+            'accessories_by_frame': [],
+            'postures': [],
+            'last_seen': time.time()
+        })
+        self.track_to_person_map: Dict[int, int] = {}
 
         # Initialize components
         self._init_detector()
@@ -128,7 +140,7 @@ class MemoryTrackPipeline:
 
     def _init_memory_bank(self):
         """Initialize adaptive memory bank."""
-        mem_config = self.config.get_memory_bank()
+        mem_config = self.config.get_memory_bank_config()
 
         self.memory_bank = AdaptiveMemoryBank(
             embedding_dim=mem_config.get('embedding_dim', 720),
@@ -226,11 +238,21 @@ class MemoryTrackPipeline:
 
                 # Extract color features
                 color_features = None
-                if pose_features:
+                regions = {}
+                x1, y1, x2, y2 = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+                person_crop = frame[max(0, y1):max(0, y2), max(0, x1):max(0, x2)]
+                
+                if person_crop.size > 0:
+                    regions = self.color_extractor._segment_body_regions(
+                        person_crop,
+                        pose_features.keypoints if pose_features else None,
+                        pose_features.keypoint_confidences if pose_features else None,
+                        bbox
+                    )
                     color_features = self.color_extractor.extract(
                         frame, bbox,
-                        pose_features.keypoints,
-                        pose_features.keypoint_confidences
+                        pose_features.keypoints if pose_features else None,
+                        pose_features.keypoint_confidences if pose_features else None
                     )
 
                 # Extract accessory features
@@ -275,6 +297,18 @@ class MemoryTrackPipeline:
                         top_k=3
                     )
 
+                    # Extract instant forensic attributes from current frame
+                    clothing_desc = self.color_extractor.get_clothing_description(
+                        color_features,
+                        upper_crop=regions.get('upper_body'),
+                        lower_crop=regions.get('lower_body')
+                    )
+                    instant_upper = clothing_desc['upper_color']
+                    instant_lower = clothing_desc['lower_color']
+
+                    instant_accessories = [a.accessory_type for a in accessory_features.accessories] if hasattr(accessory_features, 'accessories') else []
+                    instant_posture = self.pose_extractor.classify_posture(pose_features, bbox)
+
                     if matches:
                         # Generate explanations for matches
                         for match in matches:
@@ -290,36 +324,122 @@ class MemoryTrackPipeline:
 
                         results['matches'].extend(matches)
 
-                        # Add to memory bank if high confidence track
-                        if fusion_result.confidence > 0.7:
-                            self.memory_bank.add_profile(
-                                person_id=track_id,
-                                features=fusion_result.fused_vector,
-                                camera_id=camera_id,
-                                confidence=fusion_result.confidence,
-                                modality_features=valid_features,
-                                metadata={
-                                    'modality_similarities':
-                                        matches[0].modality_similarities if matches else {},
-                                    'explanation':
-                                        matches[0].explanation if matches else ''
-                                }
-                            )
+                    # Step 5b: Consistent Global Person Identity Re-Association
+                    person_id = self.track_to_person_map.get(track_id)
+                    if person_id is None:
+                        # Check if this new track matches an existing active person in memory bank
+                        if matches and len(matches) > 0 and matches[0].confidence >= 0.65:
+                            person_id = int(matches[0].person_id)
+                            logger.info(f"Re-associated Track #{track_id} with Person #{person_id} (Confidence: {matches[0].confidence:.2f})")
+                        else:
+                            person_id = track_id
+                        self.track_to_person_map[track_id] = person_id
 
-                    # Step 6: Visualization
-                    frame = self.visualizer.draw_bbox(frame, track.bbox, track_id)
+                    # Step 5c: Temporal Multi-Shot Attribute Consensus Smoothing
+                    hist = self.person_temporal_history[person_id]
+                    hist['upper_colors'].append(instant_upper)
+                    hist['lower_colors'].append(instant_lower)
+                    hist['accessories_by_frame'].append(instant_accessories)
+                    hist['postures'].append(instant_posture)
+                    hist['last_seen'] = time.time()
+
+                    # Sliding window consensus across up to 45 recent shots (approx 1.5s)
+                    recent_upper = [c for c in hist['upper_colors'][-45:] if c != "Unknown"]
+                    consensus_upper = Counter(recent_upper).most_common(1)[0][0] if recent_upper else instant_upper
+
+                    recent_lower = [c for c in hist['lower_colors'][-45:] if c != "Unknown"]
+                    consensus_lower = Counter(recent_lower).most_common(1)[0][0] if recent_lower else instant_lower
+
+                    # Accessories consensus (detected in at least 20% of recent shots)
+                    recent_acc_frames = hist['accessories_by_frame'][-45:]
+                    acc_flat = [a for frame_accs in recent_acc_frames for a in frame_accs]
+                    acc_counts = Counter(acc_flat)
+                    min_votes = max(1, int(len(recent_acc_frames) * 0.20))
+                    consensus_accs = [acc.capitalize() for acc, count in acc_counts.items() if count >= min_votes]
+                    consensus_accessories_str = ", ".join(consensus_accs) if consensus_accs else "None"
+
+                    # Posture consensus
+                    recent_postures = [p for p in hist['postures'][-30:] if p != "Unknown"]
+                    consensus_posture = Counter(recent_postures).most_common(1)[0][0] if recent_postures else instant_posture
+
+                    # Step 6: Automatically update Memory Bank and Persistent SQLite Database
+                    if fusion_result.confidence > 0.45:
+                        self.memory_bank.add_profile(
+                            person_id=person_id,
+                            features=fusion_result.fused_vector,
+                            camera_id=camera_id,
+                            confidence=fusion_result.confidence,
+                            modality_features=valid_features,
+                            metadata={
+                                'upper_color': consensus_upper,
+                                'lower_color': consensus_lower,
+                                'accessories': consensus_accessories_str,
+                                'posture': consensus_posture,
+                                'modality_similarities': matches[0].modality_similarities if matches else {},
+                                'explanation': matches[0].explanation if matches else ''
+                            }
+                        )
+
+                        # Auto-persist to SQLite DB for forensics and investigations
+                        if self.db:
+                            try:
+                                self.db.add_or_update_tracked_person(
+                                    person_id=person_id,
+                                    name=f"Person #{person_id}",
+                                    status="active",
+                                    last_seen_camera=camera_id,
+                                    upper_color=consensus_upper,
+                                    lower_color=consensus_lower,
+                                    accessories=consensus_accessories_str,
+                                    posture=consensus_posture,
+                                    notes=f"Top: {consensus_upper}, Bottom: {consensus_lower}, Items: {consensus_accessories_str}"
+                                )
+                                self.db.add_snapshot(
+                                    person_id=person_id,
+                                    features=fusion_result.fused_vector,
+                                    camera_id=camera_id,
+                                    confidence=float(fusion_result.confidence),
+                                    frame_number=frame_number
+                                )
+                                self.db.log_event(
+                                    event_type="PERSON_TRACKED",
+                                    details=f"Tracked Person #{person_id}: {consensus_upper} top, {consensus_lower} bottom, Items: {consensus_accessories_str}, Posture: {consensus_posture}",
+                                    camera_id=camera_id
+                                )
+                            except Exception as db_err:
+                                logger.debug(f"Database auto-record error: {db_err}")
+
+                    # Step 7: Rich Forensic Visual Overlay
+                    custom_label = f"Top:{consensus_upper} | Pants:{consensus_lower}"
+                    frame = self.visualizer.draw_bbox(frame, track.bbox, person_id, label=custom_label)
 
                     if pose_features:
                         frame = self.visualizer.draw_pose(frame, pose_features, bbox)
 
                     frame = self.visualizer.draw_trajectory(frame, track)
 
+                    # Draw Accessory and Posture badge
+                    badge_items = []
+                    if consensus_accessories_str != "None":
+                        badge_items.append(f"🎒 {consensus_accessories_str}")
+                    badge_items.append(f"🏃 {consensus_posture}")
+                    
+                    cv2.putText(
+                        frame,
+                        " | ".join(badge_items),
+                        (int(bbox[0]), int(bbox[3]) + 18),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.45,
+                        (0, 255, 255),
+                        1
+                    )
+
                     if occlusion.is_occluded:
                         # Draw occlusion warning
                         cv2.putText(
                             frame,
                             f"Occluded: {','.join(occlusion.affected_modalities)}",
-                            (int(bbox[0]), int(bbox[1]) - 10),
+                            (int(bbox[0]), int(bbox[1]) - 15),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             0.4,
                             (0, 0, 255),
@@ -609,9 +729,21 @@ class MemoryTrackPipeline:
 
     def cleanup(self):
         """Cleanup resources."""
-        self.pose_extractor.close()
-        self.reid_extractor.close()
-        self.db.close()
+        if hasattr(self, 'pose_extractor') and self.pose_extractor:
+            try:
+                self.pose_extractor.close()
+            except Exception:
+                pass
+        if hasattr(self, 'reid_extractor') and self.reid_extractor:
+            try:
+                self.reid_extractor.close()
+            except Exception:
+                pass
+        if hasattr(self, 'db') and self.db:
+            try:
+                self.db.close()
+            except Exception:
+                pass
         logger.info("Pipeline cleanup complete")
 
 

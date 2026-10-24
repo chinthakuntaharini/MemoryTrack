@@ -1,0 +1,3 @@
+@echo off
+echo Starting MemoryTrack Desktop Application...
+python desktop_app.py

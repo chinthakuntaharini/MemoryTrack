@@ -341,3 +341,8 @@ class SimpleReIDExtractor:
             features = features / norm
         
         return features
+
+    def close(self) -> None:
+        """Release resources."""
+        logger.info("ReIDExtractor closed")
+

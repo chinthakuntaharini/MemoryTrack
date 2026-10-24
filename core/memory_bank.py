@@ -4,7 +4,7 @@ Implements adaptive memory bank with FAISS indexing and temporal decay.
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import math
@@ -63,7 +63,9 @@ class AdaptiveMemoryBank:
                  decay_rate: float = 0.0001,
                  max_snapshots_per_person: int = 10,
                  update_threshold: float = 0.8,
-                 index_type: str = "IndexFlatIP"):
+                 index_type: str = "IndexFlatIP",
+                 db_manager: Optional[Any] = None,
+                 **kwargs):
         """
         Initialize adaptive memory bank.
 
@@ -73,11 +75,13 @@ class AdaptiveMemoryBank:
             max_snapshots_per_person: Maximum snapshots to keep per person
             update_threshold: Confidence threshold for profile updates
             index_type: FAISS index type
+            db_manager: Optional database manager
         """
         self.embedding_dim = embedding_dim
         self.decay_rate = decay_rate
         self.max_snapshots_per_person = max_snapshots_per_person
         self.update_threshold = update_threshold
+        self.db_manager = db_manager
 
         # Initialize FAISS index
         self.index = self._create_index(index_type)
@@ -114,7 +118,7 @@ class AdaptiveMemoryBank:
         return index
 
     def add_profile(self, person_id: int, features: np.ndarray,
-                    camera_id: str, confidence: float,
+                    camera_id: str = "cam_0", confidence: float = 1.0,
                     name: Optional[str] = None,
                     frame_number: Optional[int] = None,
                     metadata: Optional[Dict] = None,

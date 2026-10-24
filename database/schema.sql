@@ -8,11 +8,15 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS persons (
     person_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    status TEXT DEFAULT 'missing' CHECK(status IN ('missing', 'found', 'safe')),
+    status TEXT DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_seen_camera TEXT,
     last_seen_time TIMESTAMP,
+    upper_color TEXT,
+    lower_color TEXT,
+    accessories TEXT,
+    posture TEXT,
     notes TEXT
 );
 

@@ -3,6 +3,8 @@ Streamlit Dashboard for MemoryTrack system.
 Provides real-time monitoring, missing person search, and memory bank management.
 """
 
+import os
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import streamlit as st
 import cv2
 import numpy as np
@@ -29,7 +31,7 @@ try:
     from utils.db_manager import DatabaseManager
     from core.memory_bank import AdaptiveMemoryBank
     UTILS_AVAILABLE = True
-except ImportError as e:
+except Exception as e:
     st.error(f"Error importing core components: {e}")
     UTILS_AVAILABLE = False
 
@@ -58,7 +60,7 @@ def main():
     if not UTILS_AVAILABLE:
         st.error("Dashboard cannot function without core components. Please check the installation.")
         st.info("Run: pip install -r requirements.txt")
-        return
+        # return
     
     # Sidebar navigation
     with st.sidebar:
