@@ -13,6 +13,7 @@ jobs:
     name: Test on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: [3.11, 3.12]
 
@@ -35,7 +36,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libgtk-3-0
+        sudo apt-get install -y libgl1 libglib2.0-0 libgtk-3-0
     
     - name: Install CI dependencies
       run: |
