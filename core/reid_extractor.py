@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 ReID extractor module for MemoryTrack system.
 Implements TorchReID-based appearance feature extraction for person re-identification.
@@ -5,7 +6,7 @@ Implements TorchReID-based appearance feature extraction for person re-identific
 
 import cv2
 import numpy as np
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 from pathlib import Path
 import logging
 
@@ -69,7 +70,7 @@ class ReIDExtractor:
                 return "cpu"
         return device
     
-    def _load_model(self, weights_path: Optional[str]) -> nn.Module:
+    def _load_model(self, weights_path: Optional[str]) -> Any:
         """
         Load ReID model.
         
@@ -110,7 +111,7 @@ class ReIDExtractor:
             # Return fallback model
             return self._build_fallback_model()
     
-    def _build_fallback_model(self) -> nn.Module:
+    def _build_fallback_model(self) -> Any:
         """
         Build a fallback ResNet-50 model for ReID.
         
@@ -152,7 +153,7 @@ class ReIDExtractor:
             transforms.Normalize(mean=self.IMAGENET_MEAN, std=self.IMAGENET_STD)
         ])
     
-    def preprocess(self, image: np.ndarray) -> torch.Tensor:
+    def preprocess(self, image: np.ndarray) -> Any:
         """
         Preprocess image for model input.
         
