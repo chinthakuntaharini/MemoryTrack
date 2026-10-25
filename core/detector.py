@@ -13,7 +13,8 @@ from pathlib import Path
 try:
     from ultralytics import YOLO
 except ImportError:
-    raise ImportError("ultralytics package not found. Install with: pip install ultralytics")
+    YOLO = None
+    logging.warning("ultralytics package not found. PersonDetector requires ultralytics.")
 
 try:
     from bytetracker import BYTETracker
@@ -99,6 +100,8 @@ class PersonDetector:
     
     def _load_model(self):
         """Load YOLOv11 model."""
+        if YOLO is None:
+            raise ImportError("ultralytics package not found. Install with: pip install ultralytics")
         try:
             model = YOLO(self.model_path)
             # Move model to specified device

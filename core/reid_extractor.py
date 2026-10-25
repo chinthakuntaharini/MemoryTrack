@@ -14,7 +14,10 @@ try:
     import torch.nn as nn
     from torchvision import transforms
 except ImportError:
-    raise ImportError("PyTorch not found. Install with: pip install torch torchvision")
+    torch = None
+    nn = None
+    transforms = None
+    logging.warning("PyTorch not found. ReIDExtractor requires torch and torchvision.")
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +42,8 @@ class ReIDExtractor:
             embedding_dim: Dimension of output embedding
             device: Device to run inference ('cuda' or 'cpu')
         """
+        if torch is None:
+            raise ImportError("PyTorch not found. Install with: pip install torch torchvision")
         self.model_name = model_name
         self.embedding_dim = embedding_dim
         self.device = self._check_device(device)

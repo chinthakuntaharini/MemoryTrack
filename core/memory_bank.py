@@ -14,7 +14,8 @@ import logging
 try:
     import faiss
 except ImportError:
-    raise ImportError("FAISS not found. Install with: pip install faiss-cpu")
+    faiss = None
+    logging.warning("FAISS not found. AdaptiveMemoryBank requires faiss-cpu.")
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,8 @@ class AdaptiveMemoryBank:
         self.db_manager = db_manager
 
         # Initialize FAISS index
+        if faiss is None:
+            raise ImportError("FAISS not found. Install with: pip install faiss-cpu")
         self.index = self._create_index(index_type)
 
         # Store profiles
