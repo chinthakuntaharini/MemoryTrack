@@ -17,16 +17,16 @@ def test_imports():
     
     try:
         from utils.config_loader import ConfigLoader
-        print("✅ ConfigLoader imported successfully")
+        print("[PASS] ConfigLoader imported successfully")
     except ImportError as e:
-        print(f"❌ ConfigLoader import failed: {e}")
+        print(f"[FAIL] ConfigLoader import failed: {e}")
         return False
     
     try:
         from utils.db_manager import DatabaseManager
-        print("✅ DatabaseManager imported successfully")
+        print("[PASS] DatabaseManager imported successfully")
     except ImportError as e:
-        print(f"❌ DatabaseManager import failed: {e}")
+        print(f"[FAIL] DatabaseManager import failed: {e}")
         return False
     
     return True
@@ -45,10 +45,10 @@ def test_configuration():
         assert config.get_feature_extraction_config() is not None
         assert config.get_memory_bank_config() is not None
         
-        print("✅ Configuration loaded and validated")
+        print("[PASS] Configuration loaded and validated")
         return True
     except Exception as e:
-        print(f"❌ Configuration test failed: {e}")
+        print(f"[FAIL] Configuration test failed: {e}")
         return False
 
 def test_database():
@@ -76,10 +76,10 @@ def test_database():
         assert person is not None
         assert person['name'] == 'Test Person'
         
-        print("✅ Database operations successful")
+        print("[PASS] Database operations successful")
         return True
     except Exception as e:
-        print(f"❌ Database test failed: {e}")
+        print(f"[FAIL] Database test failed: {e}")
         return False
 
 def test_core_modules():
@@ -104,16 +104,16 @@ def test_core_modules():
             if hasattr(core, class_name):
                 available_classes.append(class_name)
         
-        print(f"✅ {len(available_classes)}/{len(expected_classes)} core classes available")
+        print(f"[PASS] {len(available_classes)}/{len(expected_classes)} core classes available")
         
         if len(available_classes) >= len(expected_classes) * 0.8:  # 80% threshold
             return True
         else:
-            print("❌ Too many core classes missing")
+            print("[FAIL] Too many core classes missing")
             return False
             
     except Exception as e:
-        print(f"❌ Core module test failed: {e}")
+        print(f"[FAIL] Core module test failed: {e}")
         return False
 
 def test_project_structure():
@@ -147,20 +147,20 @@ def test_project_structure():
             missing_dirs.append(dir_path)
     
     if missing_files:
-        print(f"❌ Missing files: {missing_files}")
+        print(f"[FAIL] Missing files: {missing_files}")
     
     if missing_dirs:
-        print(f"❌ Missing directories: {missing_dirs}")
+        print(f"[FAIL] Missing directories: {missing_dirs}")
     
     if not missing_files and not missing_dirs:
-        print("✅ All required files and directories present")
+        print("[PASS] All required files and directories present")
         return True
     else:
         return False
 
 def main():
     """Run all basic tests."""
-    print("🚀 MemoryTrack Basic Test Suite")
+    print("MemoryTrack Basic Test Suite")
     print("=" * 50)
     
     tests = [
@@ -181,20 +181,20 @@ def main():
         try:
             if test_func():
                 passed += 1
-                print(f"✅ {test_name} PASSED")
+                print(f"[PASS] {test_name} PASSED")
             else:
-                print(f"❌ {test_name} FAILED")
+                print(f"[FAIL] {test_name} FAILED")
         except Exception as e:
-            print(f"❌ {test_name} FAILED with exception: {e}")
+            print(f"[FAIL] {test_name} FAILED with exception: {e}")
     
     print("\n" + "=" * 50)
-    print(f"📊 Test Results: {passed}/{total} tests passed")
+    print(f"Test Results: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 All tests passed! MemoryTrack basic functionality is working.")
+        print("All tests passed! MemoryTrack basic functionality is working.")
         sys.exit(0)
     else:
-        print(f"⚠️  {total - passed} tests failed. Check the output above.")
+        print(f"[WARN] {total - passed} tests failed. Check the output above.")
         sys.exit(1)
 
 if __name__ == "__main__":

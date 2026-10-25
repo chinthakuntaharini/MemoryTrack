@@ -29,7 +29,7 @@
 ### Objective
 **MemoryTrack** is an advanced real-time computer vision system engineered for automated missing person tracking, surveillance re-identification (Re-ID), and forensic behavioral memory accumulation.
 
-### ️ The Problem with Traditional Surveillance Systems
+### The Problem with Traditional Surveillance Systems
 1. **ID Switching & Fragmentation**: Traditional single-camera trackers (ByteTrack, DeepSORT) assign new IDs whenever a person is occluded, turns around, or steps out of frame for 1–2 seconds.
 2. **Fragility to Appearance Variations**: Traditional systems rely solely on full-body appearance (ResNet embeddings), failing under partial occlusions, dark lighting, or background clutter.
 3. **No Temporal Memory**: Standard computer vision pipelines treat each frame in isolation without accumulating forensic memory over time.
@@ -101,7 +101,7 @@ graph TB
  MAJORITY_VOTE["Majority Voting & Identity Re-Association"]
  end
 
- subgraph PRESENTATION["️ 7. User Interface & Forensic Dashboard"]
+ subgraph PRESENTATION["7. User Interface & Forensic Dashboard"]
  UI_LIVE[" Tab 1: Live Video HUD & Bounding Badges"]
  UI_MEM[" Tab 2: Memory Bank & Auto-Refreshed Profiles"]
  UI_SEARCH[" Tab 3: Missing Person Search & XAI Report"]
@@ -330,14 +330,14 @@ stateDiagram-v2
  RenderOverlay --> DisplayPixmap
  }
  
- ProcessingLoop --> WaitingSource : Click '⏹️ Stop'
+ ProcessingLoop --> WaitingSource : Click 'Stop'
  }
  
  state Tab2_Memory {
  [*] --> AutoRefreshTimer : 2-Second Heartbeat
  AutoRefreshTimer --> FetchSQL : SELECT * FROM persons
  FetchSQL --> PopulateTable : Render 10 Forensic Columns
- PopulateTable --> ClearDBDialog : User clicks '️ Clear Database'
+ PopulateTable --> ClearDBDialog : User clicks 'Clear Database'
  ClearDBDialog --> ResetTables : Confirmed Yes
  ResetTables --> FetchSQL : Clean Slate UI
  }
@@ -375,7 +375,7 @@ $$\mathbf{z}_{\text{fused}} = \left[ \mathbf{v}_{\text{reid}} \parallel \mathbf{
 
 ---
 
-### ️ 2. Occlusion-Aware Dynamic Weighting
+### 2. Occlusion-Aware Dynamic Weighting
 When a person is partially occluded (e.g., behind a desk or passing another person), static feature weights cause severe matching degradation. MemoryTrack dynamically scales modality weights:
 
 $$w_i = \alpha_i \cdot c_i \cdot (1 - o_i)$$
@@ -393,7 +393,7 @@ $$\mathbf{z}_{\text{fused}} = \frac{\bigoplus_{i=1}^{M} \left( \sqrt{\tilde{w}_i
 
 ---
 
-### ⏳ 3. Exponential Temporal Memory Decay
+### 3. Exponential Temporal Memory Decay
 In surveillance scenarios, a person's appearance may change slightly over hours (lighting shifts, taking off a jacket). MemoryTrack weights historical memory bank snapshots using exponential half-life decay:
 
 $$w(t) = e^{-\lambda (t_{\text{current}} - t_{\text{snapshot}})}$$
@@ -533,59 +533,59 @@ erDiagram
 
 # 9. Slide-by-Slide Defense / Presentation Structure
 
-### ️ Slide 1: Title & Overview
+### Slide 1: Title & Overview
 * **Title**: MemoryTrack — Adaptive Multi-Modal AI System for Person Tracking, Behavioral Forensics & Long-Term Memory
 * **Author / Presenter**: Team MemoryTrack
 * **Core Tagline**: Bridging deep spatial tracking, multi-modal biometric fusion, and explainable forensic memory.
 
-### ️ Slide 2: Problem Statement & Motivation
+### Slide 2: Problem Statement & Motivation
 * CCTV and surveillance systems suffer from ID switching during occlusions.
 * Visual appearance changes under shadows, camera angles, and background clutter.
 * Law enforcement and security teams need instant semantic forensic search ("Find person with White Shirt, Black Shorts, wearing Backpack").
 
-### ️ Slide 3: Proposed System Architecture
+### Slide 3: Proposed System Architecture
 * Two-tier storage design (FAISS vector memory + SQLite relational database).
 * End-to-end pipeline: Ingestion $\to$ YOLO11 Detection $\to$ 5-Modality Extraction $\to$ Occlusion Fusion $\to$ Temporal Consensus $\to$ UI & SQL Persistence.
 
-### ️ Slide 4: 720-D Multi-Modal Feature Fusion
+### Slide 4: 720-D Multi-Modal Feature Fusion
 * Breakdown of the 720-D feature embedding vector.
 * Why multi-modal? If appearance is shadowed, pose and motion maintain identity. If a person sits down, color and Re-ID preserve tracking.
 
-### ️ Slide 5: Occlusion-Aware Dynamic Weighting
+### Slide 5: Occlusion-Aware Dynamic Weighting
 * Mathematical formulation: $w_i = \alpha_i \cdot c_i \cdot (1 - o_i)$.
 * Dynamic gating: Automatically shuts off occluded body parts to prevent contaminated features.
 
-### ️ Slide 6: Continuous Multi-Shot Temporal Consensus
+### Slide 6: Continuous Multi-Shot Temporal Consensus
 * Explanation of Sliding-Window Voting across 45 frames (~1.5s).
 * Replaces noisy single-frame flickers with stabilized, highly reliable attribute classifications.
 
-### ️ Slide 7: Accurate Pose-Guided Color Parsing & Skin Masking
+### Slide 7: Accurate Pose-Guided Color Parsing & Skin Masking
 * How shoulder/hip keypoints isolate torso and leg columns.
 * Removing background clutter (chairs, tables, tablecloths) and filtering out human skin tones.
 * Calibrated indoor webcam color thresholds for White, Black, Navy, Dark Gray, etc.
 
-### ️ Slide 8: Biomechanical Posture & Accessory Detection
+### Slide 8: Biomechanical Posture & Accessory Detection
 * Vertical thigh delta ($\Delta Y_{\text{thigh}}$) and aspect ratio analysis for **Sitting on Chair** vs **Standing**.
 * Intersection over Accessory Area ($\text{IoA} \ge 0.25$) for reliable backpack, handbag, and cap detection.
 
-### ️ Slide 9: Two-Tier Memory & Database Engine
+### Slide 9: Two-Tier Memory & Database Engine
 * **Tier 1**: FAISS Sub-millisecond Cosine Vector Index with Exponential Temporal Decay ($T_{1/2} = 300\text{s}$).
 * **Tier 2**: SQLite Relational Database (`memorytrack.db`) storing 10 forensic columns and snapshot histories.
 
-### ️ Slide 10: Explainable AI (XAI) Engine
+### Slide 10: Explainable AI (XAI) Engine
 * How match decisions are decomposed into human-readable percentage contributions.
 * Crucial for legal and investigative accountability in forensic investigations.
 
-### ️ Slide 11: Desktop Application & UI Walkthrough
+### Slide 11: Desktop Application & UI Walkthrough
 * Live video feed with bounding badges.
-* Real-time Memory Bank table with 2-second auto-refresh and `️ Clear Database` functionality.
+* Real-time Memory Bank table with 2-second auto-refresh and `Clear Database` functionality.
 * Missing Person inspection tab with complete snapshot timelines.
 
-### ️ Slide 12: Experimental Results & Test Validation
+### Slide 12: Experimental Results & Test Validation
 * 47/47 passing automated integration, unit, and performance tests (100% test pass rate).
 * High-FPS real-time execution on CPU and CUDA.
 
-### ️ Slide 13: Conclusion & Future Scope
+### Slide 13: Conclusion & Future Scope
 * **Summary**: A robust, occlusion-resilient, multi-modal tracking and forensic memory system.
 * **Future Scope**: Multi-camera cross-network synchronization, drone aerial feed integration, and edge device deployment (Jetson Orin).
 

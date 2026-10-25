@@ -53,7 +53,7 @@ For more information, see README.md
 
 def run_demo():
     """Run the system demo."""
-    print("🎯 Running MemoryTrack Demo...")
+    print("Running MemoryTrack Demo...")
     try:
         import subprocess
         result = subprocess.run([sys.executable, 'demo.py'], 
@@ -71,7 +71,7 @@ def run_demo():
 
 def run_tests():
     """Run basic tests."""
-    print("🧪 Running Basic Tests...")
+    print("Running Basic Tests...")
     try:
         import subprocess
         result = subprocess.run([sys.executable, 'test_basic.py'], 
@@ -89,7 +89,7 @@ def run_tests():
 
 def run_dashboard():
     """Start the Streamlit dashboard."""
-    print("📊 Starting MemoryTrack Dashboard...")
+    print("Starting MemoryTrack Dashboard...")
     print("Dashboard will be available at: http://localhost:8501")
     print("Press Ctrl+C to stop the dashboard")
     
@@ -102,7 +102,7 @@ def run_dashboard():
             '--server.port=8501'
         ])
     except KeyboardInterrupt:
-        print("\n🛑 Dashboard stopped by user")
+        print("\nDashboard stopped by user")
     except Exception as e:
         print(f"Dashboard failed to start: {e}")
         return False
@@ -111,8 +111,8 @@ def run_dashboard():
 
 def run_full_pipeline(args):
     """Run the full MemoryTrack pipeline."""
-    print("🚀 Starting MemoryTrack Pipeline...")
-    print("⚠️  Note: This requires full ML dependencies to be installed")
+    print("Starting MemoryTrack Pipeline...")
+    print("Note: This requires full ML dependencies to be installed")
     
     try:
         # Try to import the full pipeline
@@ -123,31 +123,31 @@ def run_full_pipeline(args):
         
         # Process based on input type
         if args.video:
-            print(f"📹 Processing video: {args.video}")
+            print(f"Processing video: {args.video}")
             pipeline.process_video(args.video, args.output)
         elif args.webcam is not None:
-            print(f"📸 Processing webcam: {args.webcam}")
+            print(f"Processing webcam: {args.webcam}")
             pipeline.process_webcam(args.webcam, args.output)
         elif args.rtsp:
-            print(f"📡 Processing RTSP stream: {args.rtsp}")
+            print(f"Processing RTSP stream: {args.rtsp}")
             pipeline.process_rtsp(args.rtsp, args.output)
         else:
-            print("❌ No input source specified")
+            print("[ERROR] No input source specified")
             return False
             
     except ImportError as e:
-        print(f"❌ Pipeline dependencies not available: {e}")
-        print("💡 Try installing full dependencies: pip install -r requirements.txt")
+        print(f"[ERROR] Pipeline dependencies not available: {e}")
+        print("Try installing full dependencies: pip install -r requirements.txt")
         return False
     except Exception as e:
-        print(f"❌ Pipeline failed: {e}")
+        print(f"[ERROR] Pipeline failed: {e}")
         return False
     
     return True
 
 def check_system_status():
     """Check system status and available features."""
-    print("🔍 MemoryTrack System Status")
+    print("MemoryTrack System Status")
     print("=" * 50)
     
     # Check Python version
@@ -177,19 +177,19 @@ def check_system_status():
                 import faiss
             else:
                 __import__(pkg)
-            available.append(f"✅ {pkg}: {description}")
+            available.append(f"[OK] {pkg}: {description}")
         except ImportError:
-            missing.append(f"❌ {pkg}: {description}")
+            missing.append(f"[MISSING] {pkg}: {description}")
     
-    print("\n📦 Available Dependencies:")
+    print("\nAvailable Dependencies:")
     for dep in available:
-        print(f"  {dep}")
+        print(f"{dep}")
     
     if missing:
-        print("\n⚠️  Missing Dependencies:")
+        print("\nMissing Dependencies:")
         for dep in missing:
-            print(f"  {dep}")
-        print("\n💡 Install with: pip install -r requirements.txt")
+            print(f"{dep}")
+        print("\nInstall with: pip install -r requirements.txt")
     
     # Check project structure
     required_files = [
@@ -200,20 +200,20 @@ def check_system_status():
         'utils/__init__.py'
     ]
     
-    print(f"\n📁 Project Structure:")
+    print(f"\nProject Structure:")
     for file in required_files:
-        status = "✅" if os.path.exists(file) else "❌"
-        print(f"  {status} {file}")
+        status = "[OK]" if os.path.exists(file) else "[MISSING]"
+        print(f"{status} {file}")
     
-    print(f"\n🎯 Available Features:")
-    print(f"  ✅ Demo mode (--demo)")
-    print(f"  ✅ Basic tests (--test)")
-    print(f"  ✅ Dashboard (--dashboard)")
+    print(f"\nAvailable Features:")
+    print(f"[OK] Demo mode (--demo)")
+    print(f"[OK] Basic tests (--test)")
+    print(f"[OK] Dashboard (--dashboard)")
     
     if len(missing) == 0:
-        print(f"  ✅ Full pipeline (--video, --webcam, --rtsp)")
+        print(f"[OK] Full pipeline (--video, --webcam, --rtsp)")
     else:
-        print(f"  ⚠️  Full pipeline (install missing dependencies)")
+        print(f"[WARN] Full pipeline (install missing dependencies)")
 
 def main():
     """Main entry point."""
@@ -246,10 +246,10 @@ def main():
         return 0 if success else 1
         
     except KeyboardInterrupt:
-        print("\n🛑 Operation cancelled by user")
+        print("\nOperation cancelled by user")
         return 130
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f"[ERROR] Unexpected error: {e}")
         if args.debug:
             import traceback
             traceback.print_exc()

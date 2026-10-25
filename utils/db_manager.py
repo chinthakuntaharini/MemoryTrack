@@ -508,10 +508,6 @@ class DatabaseManager:
         cursor.execute("DELETE FROM system_events")
         self.connection.commit()
         logger.info("Cleared all database tables")
-
-        match_id = cursor.lastrowid
-        logger.info(f"Added match {match_id}: person {matched_person_id} with {confidence:.2f} confidence")
-        return match_id
     
     def get_recent_matches(self, limit: int = 100) -> List[Dict[str, Any]]:
         """

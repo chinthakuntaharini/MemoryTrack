@@ -17,7 +17,7 @@ def main():
     """Main dashboard application."""
     st.set_page_config(
         page_title="MemoryTrack Dashboard",
-        page_icon="🔍",
+        page_icon=None,
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -27,11 +27,11 @@ def main():
     st.sidebar.markdown("Adaptive Memory-Based Missing Person Tracking")
     
     pages = {
-        "🏠 Home": show_home,
-        "📊 System Status": show_system_status,
-        "🔍 Memory Bank": show_memory_bank,
-        "⚙️ Configuration": show_configuration,
-        "ℹ️ About": show_about
+        "Home": show_home,
+        "System Status": show_system_status,
+        "Memory Bank": show_memory_bank,
+        "Configuration": show_configuration,
+        "About": show_about
     }
     
     selected_page = st.sidebar.selectbox("Navigation", list(pages.keys()))
@@ -45,13 +45,13 @@ def main():
 
 def show_home():
     """Show home page."""
-    st.title("🔍 MemoryTrack Dashboard")
+    st.title("MemoryTrack Dashboard")
     st.markdown("### Adaptive Memory-Based Multi-Camera Missing Person Tracking System")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric("System Status", "✅ Online")
+        st.metric("System Status", "Online")
     
     with col2:
         st.metric("Active Cameras", "0")
@@ -62,7 +62,7 @@ def show_home():
     st.markdown("---")
     
     # Quick start section
-    st.subheader("🚀 Quick Start")
+    st.subheader("Quick Start")
     
     st.markdown("""
     **Welcome to MemoryTrack!** This dashboard provides a comprehensive interface for managing
@@ -76,14 +76,14 @@ def show_home():
     """)
     
     # Status indicators
-    st.subheader("📊 System Components")
+    st.subheader("System Components")
     
     components = [
-        ("Detection System", "✅ Ready", "YOLOv11 person detection"),
-        ("Tracking System", "✅ Ready", "ByteTrack multi-object tracking"),
-        ("Feature Extraction", "✅ Ready", "5 modality fusion system"),
-        ("Memory Bank", "✅ Ready", "FAISS vector similarity search"),
-        ("Database", "✅ Ready", "SQLite operational")
+        ("Detection System", "Ready", "YOLOv11 person detection"),
+        ("Tracking System", "Ready", "ByteTrack multi-object tracking"),
+        ("Feature Extraction", "Ready", "5 modality fusion system"),
+        ("Memory Bank", "Ready", "FAISS vector similarity search"),
+        ("Database", "Ready", "SQLite operational")
     ]
     
     for name, status, description in components:
@@ -97,10 +97,10 @@ def show_home():
 
 def show_system_status():
     """Show system status page."""
-    st.title("📊 System Status")
+    st.title("System Status")
     
     # System information
-    st.subheader("🖥️ System Information")
+    st.subheader("System Information")
     
     try:
         import platform
@@ -118,7 +118,7 @@ def show_system_status():
         st.warning(f"Could not fetch system info: {e}")
     
     # Dependency status
-    st.subheader("📦 Dependencies")
+    st.subheader("Dependencies")
     
     dependencies = {
         'streamlit': 'Dashboard framework',
@@ -143,12 +143,12 @@ def show_system_status():
                 module = __import__(package)
                 version = getattr(module, '__version__', 'Unknown')
             
-            st.success(f"✅ {package} ({version}): {description}")
+            st.success(f"[OK] {package} ({version}): {description}")
         except ImportError:
-            st.error(f"❌ {package}: {description} - Not installed")
+            st.error(f"[FAIL] {package}: {description} - Not installed")
     
     # Performance metrics
-    st.subheader("⚡ Performance Metrics")
+    st.subheader("Performance Metrics")
     
     col1, col2, col3 = st.columns(3)
     
@@ -163,7 +163,7 @@ def show_system_status():
 
 def show_memory_bank():
     """Show memory bank management page."""
-    st.title("🧠 Memory Bank Management")
+    st.title("Memory Bank Management")
     
     st.markdown("""
     The memory bank stores feature vectors for known persons with temporal decay.
@@ -171,7 +171,7 @@ def show_memory_bank():
     """)
     
     # Memory bank statistics
-    st.subheader("📈 Statistics")
+    st.subheader("Statistics")
     
     try:
         from utils.db_manager import DatabaseManager
@@ -201,7 +201,7 @@ def show_memory_bank():
         st.info("Make sure the database is initialized: python -c \"from utils.db_manager import DatabaseManager; DatabaseManager().init_db()\"")
     
     # Search interface
-    st.subheader("🔍 Search Memory Bank")
+    st.subheader("Search Memory Bank")
     
     search_method = st.selectbox(
         "Search Method",
@@ -230,7 +230,7 @@ def show_memory_bank():
 
 def show_configuration():
     """Show configuration page."""
-    st.title("⚙️ Configuration")
+    st.title("Configuration")
     
     st.markdown("System configuration settings and parameters.")
     
@@ -238,7 +238,7 @@ def show_configuration():
     tabs = st.tabs(["Detection", "Tracking", "Memory Bank", "Dashboard"])
     
     with tabs[0]:
-        st.subheader("🎯 Detection Settings")
+        st.subheader("Detection Settings")
         
         model_path = st.text_input("Model Path", value="yolo11n.pt")
         confidence = st.slider("Confidence Threshold", 0.0, 1.0, 0.5, 0.05)
@@ -249,7 +249,7 @@ def show_configuration():
             st.success("Detection settings would be updated (demo mode)")
     
     with tabs[1]:
-        st.subheader("🎯 Tracking Settings")
+        st.subheader("Tracking Settings")
         
         max_age = st.number_input("Max Age", value=30, min_value=1)
         min_hits = st.number_input("Min Hits", value=3, min_value=1)
@@ -259,7 +259,7 @@ def show_configuration():
             st.success("Tracking settings would be updated (demo mode)")
     
     with tabs[2]:
-        st.subheader("🧠 Memory Bank Settings")
+        st.subheader("Memory Bank Settings")
         
         embedding_dim = st.number_input("Embedding Dimension", value=720, min_value=64)
         decay_rate = st.number_input("Decay Rate", value=0.0001, format="%.4f")
@@ -269,7 +269,7 @@ def show_configuration():
             st.success("Memory bank settings would be updated (demo mode)")
     
     with tabs[3]:
-        st.subheader("📊 Dashboard Settings")
+        st.subheader("Dashboard Settings")
         
         refresh_interval = st.number_input("Refresh Interval (ms)", value=100, min_value=10)
         max_cameras = st.number_input("Max Display Cameras", value=4, min_value=1)
@@ -280,13 +280,13 @@ def show_configuration():
 
 def show_about():
     """Show about page."""
-    st.title("ℹ️ About MemoryTrack")
+    st.title("About MemoryTrack")
     
     st.markdown("""
-    ## 🎯 MemoryTrack
+    ## MemoryTrack
     **Adaptive Memory-Based Multi-Camera Missing Person Tracking System**
     
-    ### 🔬 Research Contributions
+    ### Research Contributions
     
     MemoryTrack introduces several novel approaches to missing person tracking:
     
@@ -294,13 +294,13 @@ def show_about():
     2. **Multi-Modal Fusion**: Dynamic weight adjustment based on occlusion detection  
     3. **Explainable AI**: Modality contribution analysis for transparent matching
     
-    ### 🏗️ System Architecture
+    ### System Architecture
     
     ```
     Video Input → Detection → Tracking → Feature Extraction → Fusion → Memory Bank → Search
     ```
     
-    ### 📊 Key Features
+    ### Key Features
     
     - **Multi-Modal Features**: Appearance, pose, color, accessories, motion
     - **Real-Time Processing**: 8-20 FPS on CPU, 20-30+ FPS on GPU
@@ -308,7 +308,7 @@ def show_about():
     - **Fast Search**: <100ms query time with FAISS indexing
     - **Explainable Results**: Natural language match explanations
     
-    ### 🛠️ Technology Stack
+    ### Technology Stack
     
     - **Detection**: YOLOv11 (Ultralytics)
     - **Tracking**: ByteTrack with Kalman filtering
@@ -318,7 +318,7 @@ def show_about():
     - **Database**: SQLite with SQLAlchemy ORM
     - **Dashboard**: Streamlit web interface
     
-    ### 📈 Performance Metrics
+    ### Performance Metrics
     
     - **Detection Accuracy**: >95% mAP (YOLOv11)
     - **Memory Efficiency**: 1000+ profiles supported
@@ -326,14 +326,14 @@ def show_about():
     - **Real-time Capability**: Multi-camera processing
     - **Adaptive Learning**: Dynamic weight adjustment
     
-    ### 📖 Documentation
+    ### Documentation
     
     - **GitHub**: https://github.com/chinthakuntaharini/MemoryTrack
     - **Setup Guide**: See SETUP.md
     - **API Documentation**: Complete docstrings
     - **Configuration**: config/settings.yaml
     
-    ### 🎓 Citation
+    ### Citation
     
     If you use MemoryTrack in your research, please cite:
     
@@ -346,7 +346,7 @@ def show_about():
     }
     ```
     
-    ### 📞 Support
+    ### Support
     
     - **Issues**: GitHub Issues
     - **Email**: Contact via GitHub profile
@@ -354,7 +354,7 @@ def show_about():
     
     ---
     
-    *Built with ❤️ for safer communities*
+    *Built for safer communities*
     """)
 
 if __name__ == "__main__":

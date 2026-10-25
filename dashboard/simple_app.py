@@ -8,8 +8,8 @@ st.title("MemoryTrack Dashboard")
 st.write("Welcome to MemoryTrack - Missing Person Tracking System")
 
 st.header("System Status")
-st.write("✅ Dashboard is running")
-st.write("✅ All components loaded")
+st.write("[OK] Dashboard is running")
+st.write("[OK] All components loaded")
 
 st.header("Navigation")
 st.write("Select a page from the sidebar:")

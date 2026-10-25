@@ -34,12 +34,12 @@ def demo_configuration():
         
         return True
     except Exception as e:
-        print(f"❌ Configuration demo failed: {e}")
+        print(f"[FAIL] Configuration demo failed: {e}")
         return False
 
 def demo_database():
     """Demonstrate database operations."""
-    print("\n🗄️  Database Operations Demo")
+    print("\nDatabase Operations Demo")
     print("-" * 40)
     
     try:
@@ -49,7 +49,7 @@ def demo_database():
         # Use in-memory database for demo
         db = DatabaseManager(":memory:")
         db.init_db()
-        print("✅ Database initialized")
+        print("[OK] Database initialized")
         
         # Create a test person
         person_data = {
@@ -59,7 +59,7 @@ def demo_database():
         }
         
         person_id = db.create_person(person_data)
-        print(f"✅ Created person with ID: {person_id}")
+        print(f"[OK] Created person with ID: {person_id}")
         
         # Add a feature snapshot
         features = np.random.random(720).astype(np.float32)
@@ -71,24 +71,24 @@ def demo_database():
         }
         
         snapshot_id = db.add_feature_snapshot(snapshot_data)
-        print(f"✅ Added feature snapshot with ID: {snapshot_id}")
+        print(f"[OK] Added feature snapshot with ID: {snapshot_id}")
         
         # Retrieve person
         person = db.get_person(person_id)
-        print(f"✅ Retrieved person: {person['name']} (Status: {person['status']})")
+        print(f"[OK] Retrieved person: {person['name']} (Status: {person['status']})")
         
         # Get snapshots
         snapshots = db.get_person_snapshots(person_id)
-        print(f"✅ Person has {len(snapshots)} feature snapshots")
+        print(f"[OK] Person has {len(snapshots)} feature snapshots")
         
         return True
     except Exception as e:
-        print(f"❌ Database demo failed: {e}")
+        print(f"[FAIL] Database demo failed: {e}")
         return False
 
 def demo_memory_bank():
     """Demonstrate memory bank operations."""
-    print("\n🧠 Memory Bank Demo")
+    print("\nMemory Bank Demo")
     print("-" * 40)
     
     try:
@@ -105,7 +105,7 @@ def demo_memory_bank():
             db_manager=db,
             decay_rate=0.001
         )
-        print("✅ Memory bank initialized")
+        print("[OK] Memory bank initialized")
         
         # Add some test profiles
         for i in range(5):
@@ -119,30 +119,30 @@ def demo_memory_bank():
                 }
             )
         
-        print("✅ Added 5 test profiles to memory bank")
+        print("[OK] Added 5 test profiles to memory bank")
         
         # Perform a search
         query_features = np.random.random(512).astype(np.float32)
         results = memory_bank.search(query_features, top_k=3)
         
-        print(f"✅ Search returned {len(results)} matches:")
+        print(f"[OK] Search returned {len(results)} matches:")
         for i, result in enumerate(results, 1):
-            print(f"   {i}. Person ID: {result.person_id}, Similarity: {result.similarity:.3f}")
+            print(f"{i}. Person ID: {result.person_id}, Similarity: {result.similarity:.3f}")
         
         # Get memory bank statistics
         stats = memory_bank.get_statistics()
-        print(f"✅ Memory bank statistics:")
-        print(f"   Total profiles: {stats.get('total_profiles', 0)}")
-        print(f"   Total snapshots: {stats.get('total_snapshots', 0)}")
+        print(f"[OK] Memory bank statistics:")
+        print(f"Total profiles: {stats.get('total_profiles', 0)}")
+        print(f"Total snapshots: {stats.get('total_snapshots', 0)}")
         
         return True
     except Exception as e:
-        print(f"❌ Memory bank demo failed: {e}")
+        print(f"[FAIL] Memory bank demo failed: {e}")
         return False
 
 def demo_feature_fusion():
     """Demonstrate feature fusion without heavy ML dependencies."""
-    print("\n🔗 Feature Fusion Demo")
+    print("\nFeature Fusion Demo")
     print("-" * 40)
     
     try:
@@ -150,7 +150,7 @@ def demo_feature_fusion():
         import numpy as np
         
         fusion = FeatureFusion()
-        print("✅ Feature fusion initialized")
+        print("[OK] Feature fusion initialized")
         
         # Create mock features
         features = {
@@ -169,24 +169,24 @@ def demo_feature_fusion():
             'motion': 0.85
         }
         
-        print("✅ Created mock features for all modalities")
+        print("[OK] Created mock features for all modalities")
         
         # Fuse features
         result = fusion.fuse(features, confidences)
         
-        print(f"✅ Feature fusion completed:")
-        print(f"   Fused vector dimension: {len(result.fused_features)}")
-        print(f"   Overall confidence: {result.overall_confidence:.3f}")
-        print(f"   Modality weights: {result.modality_weights}")
+        print(f"[OK] Feature fusion completed:")
+        print(f"Fused vector dimension: {len(result.fused_features)}")
+        print(f"Overall confidence: {result.overall_confidence:.3f}")
+        print(f"Modality weights: {result.modality_weights}")
         
         return True
     except Exception as e:
-        print(f"❌ Feature fusion demo failed: {e}")
+        print(f"[FAIL] Feature fusion demo failed: {e}")
         return False
 
 def demo_visualization():
     """Demonstrate visualization capabilities."""
-    print("\n🎨 Visualization Demo")
+    print("\nVisualization Demo")
     print("-" * 40)
     
     try:
@@ -199,7 +199,7 @@ def demo_visualization():
         frame[:] = (50, 100, 150)  # Fill with blue-ish color
         
         visualizer = Visualizer()
-        print("✅ Visualizer initialized")
+        print("[OK] Visualizer initialized")
         
         # Create mock bounding box
         bbox = BoundingBox(
@@ -208,30 +208,30 @@ def demo_visualization():
         )
         
         # Visualize (this would normally draw on the frame)
-        print("✅ Mock bounding box created for visualization")
-        print(f"   Bbox: ({bbox.x1}, {bbox.y1}) to ({bbox.x2}, {bbox.y2})")
-        print(f"   Confidence: {bbox.confidence:.2f}")
+        print("[OK] Mock bounding box created for visualization")
+        print(f"Bbox: ({bbox.x1}, {bbox.y1}) to ({bbox.x2}, {bbox.y2})")
+        print(f"Confidence: {bbox.confidence:.2f}")
         
         return True
     except Exception as e:
-        print(f"❌ Visualization demo failed: {e}")
+        print(f"[FAIL] Visualization demo failed: {e}")
         return False
 
 def demo_dashboard_info():
     """Show information about the dashboard."""
-    print("\n📊 Dashboard Information")
+    print("\nDashboard Information")
     print("-" * 40)
     
-    print("✅ Streamlit dashboard is available at:")
-    print("   Command: streamlit run dashboard/app.py")
-    print("   URL: http://localhost:8501")
+    print("[OK] Streamlit dashboard is available at:")
+    print("Command: streamlit run dashboard/app.py")
+    print("URL: http://localhost:8501")
     print("")
-    print("📋 Dashboard features:")
-    print("   • Live monitoring with multi-camera support")
-    print("   • Missing person search interface")
-    print("   • Memory bank management")
-    print("   • Analytics and system metrics")
-    print("   • Real-time visualization")
+    print("Dashboard features:")
+    print("• Live monitoring with multi-camera support")
+    print("• Missing person search interface")
+    print("• Memory bank management")
+    print("• Analytics and system metrics")
+    print("• Real-time visualization")
     
     return True
 
@@ -258,25 +258,25 @@ def main():
         try:
             if demo_func():
                 successful += 1
-                print(f"✅ {demo_name} demo completed successfully")
+                print(f"[OK] {demo_name} demo completed successfully")
             else:
-                print(f"❌ {demo_name} demo failed")
+                print(f"[FAIL] {demo_name} demo failed")
         except Exception as e:
-            print(f"❌ {demo_name} demo failed with exception: {e}")
+            print(f"[FAIL] {demo_name} demo failed with exception: {e}")
         
         time.sleep(0.5)  # Small delay for readability
     
     print("\n" + "=" * 50)
-    print(f"📊 Demo Results: {successful}/{total} demos completed successfully")
+    print(f"Demo Results: {successful}/{total} demos completed successfully")
     
     if successful == total:
-        print("🎉 All demos completed! MemoryTrack is working correctly.")
-        print("\n🚀 Next steps:")
-        print("   1. Install full dependencies: pip install -r requirements.txt")
-        print("   2. Run the dashboard: streamlit run dashboard/app.py")
-        print("   3. Process videos: python main.py --help")
+        print("All demos completed! MemoryTrack is working correctly.")
+        print("\nNext steps:")
+        print("1. Install full dependencies: pip install -r requirements.txt")
+        print("2. Run the dashboard: streamlit run dashboard/app.py")
+        print("3. Process videos: python main.py --help")
     else:
-        print(f"⚠️  {total - successful} demos failed. Check the output above.")
+        print(f"[WARN] {total - successful} demos failed. Check the output above.")
     
     return successful == total
 
