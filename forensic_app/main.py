@@ -1,6 +1,6 @@
 """
 Forensic Person Tracker & Re-ID Desktop Application Entrypoint
-Initializes PyQt6 runtime with crash guards and global exception traps.
+Initializes PyQt6 runtime (high-DPI, Fusion dark theme, glass console) with crash guards and global exception traps.
 """
 
 import os
@@ -51,39 +51,54 @@ logger = logging.getLogger("ForensicApp")
 
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QGuiApplication
 
+from forensic_app.ui.effects import apply_app_theme, brand_icon
 from forensic_app.ui.main_window import ForensicMainWindow
+
+_IN_EXCEPTION_HOOK = False
 
 
 def global_exception_hook(exctype, value, tb):
     """Crash trap: prevent application from silently closing on uncaught errors."""
+    global _IN_EXCEPTION_HOOK
     import traceback
     err_text = "".join(traceback.format_exception(exctype, value, tb))
     logger.critical(f"Uncaught Exception: {err_text}")
     print(err_text, file=sys.stderr)
 
-    # Show error modal if QApplication instance exists
-    if QApplication.instance():
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Icon.Critical)
-        msg_box.setWindowTitle("Application Diagnostic Trap")
-        msg_box.setText(f"A recoverable exception occurred:\n\n{value}")
-        msg_box.setDetailedText(err_text)
-        msg_box.exec()
+    # Show error modal if QApplication instance exists (never recursively)
+    if QApplication.instance() and not _IN_EXCEPTION_HOOK:
+        _IN_EXCEPTION_HOOK = True
+        try:
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("Application Diagnostic Trap")
+            msg_box.setText(f"A recoverable exception occurred:\n\n{value}")
+            msg_box.setDetailedText(err_text)
+            msg_box.exec()
+        finally:
+            _IN_EXCEPTION_HOOK = False
 
 
 def main():
     """Launch forensic PyQt6 desktop application."""
     sys.excepthook = global_exception_hook
 
+    # Crisp fractional scaling (125% / 150%) instead of rounding to whole factors
+    QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+
     app = QApplication(sys.argv)
     app.setApplicationName("Forensic Non-Facial Re-ID Tracker")
-    app.setApplicationVersion("2.0.0")
+    app.setApplicationVersion("2.1.0")
+    # Fusion + dark palette + Segoe UI so native widgets never flash white under the glass theme
+    apply_app_theme(app)
+    app.setWindowIcon(brand_icon())
 
     window = ForensicMainWindow()
     window.show()
 
-    logger.info("Forensic Re-ID Application running.")
+    logger.info(f"Forensic Re-ID Application running (glass backdrop: {window.backdrop_enabled}).")
     sys.exit(app.exec())
 
 

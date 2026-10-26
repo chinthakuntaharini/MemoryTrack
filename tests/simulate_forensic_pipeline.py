@@ -155,9 +155,9 @@ class TestPipelineSimulation(unittest.TestCase):
         kpts_crop[1] = [32, 28, 0.9]  # Left Eye
         kpts_crop[2] = [48, 28, 0.9]  # Right Eye
 
-        # Person crop with a dark baseball cap on head (rows 0 to 25 are dark fabric)
+        # Person crop with a red baseball cap on head (rows 0 to 25 are red fabric)
         person_crop = np.full((300, 120, 3), 180, dtype=np.uint8)
-        person_crop[0:26, :] = [20, 20, 20]  # Dark cap
+        person_crop[0:26, :] = [30, 30, 200]  # Red cap
         frame[80:380, 100:220] = person_crop
 
         parser = HumanParser()
